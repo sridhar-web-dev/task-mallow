@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Models;
+
+use App\Casts\DateOnly;
+use App\Enums\InvoiceStatus;
+use Database\Factories\InvoiceFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Invoice extends Model
+{
+    /** @use HasFactory<InvoiceFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'merchant_id',
+        'customer_id',
+        'subscription_id',
+        'period_start',
+        'period_end',
+        'currency',
+        'base_amount_minor',
+        'overage_amount_minor',
+        'total_minor',
+        'status',
+        'issued_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'period_start' => DateOnly::class,
+            'period_end' => DateOnly::class,
+            'status' => InvoiceStatus::class,
+            'issued_at' => 'immutable_datetime',
+        ];
+    }
+
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
+    }
+
+    public function lines(): HasMany
+    {
+        return $this->hasMany(InvoiceLine::class);
+    }
+}
